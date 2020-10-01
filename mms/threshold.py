@@ -1,6 +1,6 @@
 """
 Author: Zirou Qiu
-Last modfied: 09/16/2020 
+Last modfied: 10/01/2020 
 Description: 
     This module consists of simulations of the spread of multiple 
     contigions on a single network under the threshold model.
@@ -11,10 +11,9 @@ Description:
 import numpy as np
 import mms.utility as mu
 
-
 #----------------------- Funciton Defintions ----------------------#
 
-def isolate_threshold_count(A, B, T, k, r = 0, hub = False, clust = False):
+def isolate_threshold_count(A, B, T, k, r = 0):
     """
         Description
         -----------
@@ -24,14 +23,14 @@ def isolate_threshold_count(A, B, T, k, r = 0, hub = False, clust = False):
 
         Parameters
         ----------
-        A: numpy matrix, int {0, 1}
+        A: numpy array, int {0, 1}
           The adjacency matrix of G.
 
-        B: numpy matrix, int {0, 1}
+        B: numpy array, int {0, 1}
           The initial configuration matrix where $B_{vj}$ is the state value of 
           vertex v for contagion j.
 
-        T: numpy matrix, int
+        T: numpy array, int
           The threshold matrix where $T_{vj}$ is the threshold of vertex v for
           contagion j.
 
@@ -42,17 +41,9 @@ def isolate_threshold_count(A, B, T, k, r = 0, hub = False, clust = False):
           The recovery probability. In each iteration, each vertex has a probability 
           r changing the state to 0 for each contigion.
 
-        hub: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          hubs contract the contagions
-        
-        clust: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          vertices with the highest clustering coefficients contract the contagions.
-
         Returns
         -------
-        B: numpy matrix
+        B: numpy array
           The final configuration
     """
 
@@ -72,7 +63,7 @@ def isolate_threshold_count(A, B, T, k, r = 0, hub = False, clust = False):
     for i in range(k):
         # matrix operation
         B_last = B
-        B = A*B_last - T
+        B = np.matmul(A, B_last) - T
 
         # update states
         B[B >= 0] = 1
@@ -85,13 +76,15 @@ def isolate_threshold_count(A, B, T, k, r = 0, hub = False, clust = False):
         # if fixed point
         if np.array_equal(B, B_last):
             print("A fixed point is reached at iteration {}".format(i))
+            print(B)
             return B
 
+    print("Max number of iteratios reached")
     return B
 
 ###########################################################################################
 
-def correlate_threshold_count(A, B, T, W, k, r = 0, hub = False, clust = False):
+def correlate_threshold_count(A, B, T, W, k, r = 0):
     """
         Description
         -----------
@@ -101,18 +94,18 @@ def correlate_threshold_count(A, B, T, W, k, r = 0, hub = False, clust = False):
 
         Parameters
         ----------
-        A: numpy matrix, int {0, 1}
+        A: numpy array, int {0, 1}
           The adjacency matrix of G.
 
-        B: numpy matrix, int {0, 1}
+        B: numpy array, int {0, 1}
           The initial configuration matrix where $B_{vj}$ is the state value of 
           vertex v for contagion j.
 
-        T: numpy matrix, int
+        T: numpy array, int
           The threshold matrix where $T_{vj}$ is the threshold of vertex v for
           contagion j.
 
-        W: numpy matrix, float [0, 1]
+        W: numpy array, float [0, 1]
           The weight matrix where $W_{ij}$ is the weight of contagion j w.r.t 
           contagion i
 
@@ -123,17 +116,9 @@ def correlate_threshold_count(A, B, T, W, k, r = 0, hub = False, clust = False):
           The recovery probability. In each iteration, each vertex has a probability 
           r changing the state to 0 for each contigion.
 
-        hub: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          hubs contract the contagions
-        
-        clust: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          vertices with the highest clustering coefficients contract the contagions.
-
         Returns
         -------
-        B: numpy matrix
+        B: numpy array
           The final configuration
     """
 
@@ -156,7 +141,7 @@ def correlate_threshold_count(A, B, T, W, k, r = 0, hub = False, clust = False):
     for i in range(k):
         # matrix operation
         B_last = B
-        B = A * B_last * W - T
+        B = np.linalg.multi_dot([A, B_last, W]) - T # B = A @ B_last @ W - T
 
         # update states
         B[B >= 0] = 1
@@ -171,11 +156,12 @@ def correlate_threshold_count(A, B, T, W, k, r = 0, hub = False, clust = False):
             print("A fixed point is reached at iteration {}".format(i))
             return B
 
+    print("Max number of iteratios reached")
     return B
 
 ###########################################################################################
 
-def correlate_threshold_fraction(A, B, T, k, r = 0, hub = False, clust = False):
+def correlate_threshold_fraction(A, B, T, k, r = 0):
     """
         Description
         -----------
@@ -185,14 +171,14 @@ def correlate_threshold_fraction(A, B, T, k, r = 0, hub = False, clust = False):
 
         Parameters
         ----------
-        A: numpy matrix, int {0, 1}
+        A: numpy array, int {0, 1}
           The adjacency matrix of G.
 
-        B: numpy matrix, int {0, 1}
+        B: numpy array, int {0, 1}
           The initial configuration matrix where $B_{vj}$ is the state value of 
           vertex v for contagion j.
 
-        T: numpy matrix, float [0, 1]
+        T: numpy array, float [0, 1]
           The threshold matrix where $T_{vj}$ is the threshold (floats) of vertex v for
           contagion j.
 
@@ -203,17 +189,9 @@ def correlate_threshold_fraction(A, B, T, k, r = 0, hub = False, clust = False):
           The recovery probability. In each iteration, each vertex has a probability 
           r changing the state to 0 for each contigion.
 
-        hub: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          hubs contract the contagions
-        
-        clust: boolean, optional
-          If set true, prints out the indices of the iterations for which the top 10 
-          vertices with the highest clustering coefficients contract the contagions.
-
         Returns
         -------
-        B: numpy matrix
+        B: numpy array
           The final configuration
     """
 
@@ -242,7 +220,7 @@ def correlate_threshold_fraction(A, B, T, k, r = 0, hub = False, clust = False):
     for i in range(k):
         # matrix operation
         B_last = B
-        B = D * A * B_last - T
+        B = np.linalg.multi_dot([D, A, B_last]) - T # B = D @ A @ B_last - T
 
         # update states
         B[B >= 0] = 1.0
@@ -257,6 +235,7 @@ def correlate_threshold_fraction(A, B, T, k, r = 0, hub = False, clust = False):
             print("A fixed point is reached at iteration {}".format(i))
             return B
 
+    print("Max number of iteratios reached")
     return B
 
 ###########################################################################################
@@ -271,18 +250,18 @@ def correlate_threshold_density(A, B, T, d, k):
 
         Parameters
         ----------
-        A: numpy matrix, int {0, 1}
+        A: numpy array, int {0, 1}
           The adjacency matrix of G.
 
-        B: numpy matrix, int {0, 1}
+        B: numpy array, int {0, 1}
           The initial configuration matrix where $B_{vj}$ is the state value of 
           vertex v for contagion j.
 
-        T: numpy matrix, float [0, 1]
+        T: numpy array, float [0, 1]
           The threshold matrix where $T_{vj}$ is the threshold (floats) of vertex v for
           contagion j.
 
-        d: numpy matrix, int
+        d: numpy array, int
           The density vector where $d_j$ is the density of the contagion $c_j$
 
         k: int
@@ -290,11 +269,19 @@ def correlate_threshold_density(A, B, T, d, k):
 
         Returns
         -------
-        B: numpy matrix
+        B: numpy array
           The final configuration
     """
+
+    # Check if A is indeed an adjacency matrix
+    if not (mu.is_symmetric(A)):
+        raise ValueError("The adjacency matrix is not symmetric")
+    
+    # Make all 1s along the diagonal of A (since we are considering the closed neighborhood)
+    np.fill_diagonal(A, 1)
+
     # Compute the reciprocal 
-    d_bar = np.transpose( np.reciprocal(d.astype(float)) )
+    d_bar = np.transpose( np.reciprocal(d.astype(float)) ) # Make sure that d is a column vector
 
     # The number of contagions
     c =  np.shape(T)[1]
@@ -305,21 +292,21 @@ def correlate_threshold_density(A, B, T, d, k):
     for i in range(k):
       B_last = B
 
-      # Compute the totoal number of infections of each vertex
-      b = B * one
-
       # Compute M
-      M = b * d_bar
+      M = np.linalg.multi_dot([B, one, d_bar])
       M[M >= 1.0] = 1.0
       M[M < 1.0] = 0.0
       
-      B = A * M - T
+      B = np.matmul(A, M) - T
 
       # update states
       B[B >= 0.0] = 1.0
       B[B < 0.0] = 0.0
-
+      
       # if fixed point
       if np.array_equal(B, B_last):
           print("A fixed point is reached at iteration {}".format(i))
           return B
+
+    print("Max number of iteratios reached")
+    return B
