@@ -1,4 +1,5 @@
 import mms.threshold as mt
+import time
 import mms.utility as mu
 import networkx as nx
 import numpy as np
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     high = 50000
     step = 3000
     # list of p
-    p_list = [0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21, 0.23, 0.25]
+    p_list = [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21, 0.23, 0.25]
 
     # list of all functions
     list_of_func = [mt.correlate_threshold_density, mt.correlate_threshold_count, mt.correlate_threshold_fraction, mt.isolate_threshold_count]
@@ -83,9 +84,15 @@ if __name__ == "__main__":
             # Density vector #
             ##################
             d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
+        
+            start = time.process_time()
 
             # Funciton call
             f(A, B, T, W, k = num_iter)
+        
+            end = time.process_time()
+        
+            print("The time in seconds for {} is {}".format(network_name, end-start))
 
         if exp_type == 'increase_edges':
             noise_levels = ['0', '0.01', '0.03', '0.05', '0.07', '0.09', '0.11', '0.13', '0.15', '0.17', '0.19', '0.21', '0.23', '0.25']
@@ -134,9 +141,15 @@ if __name__ == "__main__":
                 # Density vector #
                 ##################
                 d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
+		
+                start = time.process_time()
 
                 # Funciton call
                 f(A, B, T, W, k = num_iter)
+
+                end = time.process_time()
+
+                print("The time in seconds for the network:{} and the percentage: {} is {}".format(network_name, noise, end-start)) 
     
     if network_type == 'synthetic':
         if exp_type == 'increase_nodes':
@@ -183,9 +196,14 @@ if __name__ == "__main__":
                 # Density vector #
                 ##################
                 d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
+                
+                start = time.process_time()
 
                 # Funciton call
                 f(A, B, T, W, k = num_iter)
+                
+                end = time.process_time()
+                print("RE network of size {} takes {} seconds".format(n, end-start))
         
         if exp_type == 'increase_edges':
             # directoy
@@ -193,9 +211,9 @@ if __name__ == "__main__":
 
             for p in p_list:
                 # The path
-                path = 'er_' + str(p) + '.edges'
+                f_path = 'er_' + str(p) + '.edges'
 
-                # read in the graph
+		# read in the graph
                 G = nx.read_edgelist(dirc + f_path, nodetype = int, data=False)
 
                 # the number of vertices
@@ -232,6 +250,11 @@ if __name__ == "__main__":
                 # Density vector #
                 ##################
                 d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
-
+                
+                start = time.process_time() # Start the time count	
+                		
                 # Funciton call
                 f(A, B, T, W, k = num_iter)
+
+                end = time.process_time() # End the time count
+                print("The ER graph with p = {} takes {} seconds".format(p, end-start))
