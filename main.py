@@ -27,6 +27,13 @@ if __name__ == "__main__":
     # the number of iterations
     num_iter = 10
 
+    # parameters for synthetic networks
+    low = 1000
+    high = 50000
+    step = 3000
+    # list of p
+    p_list = [0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21, 0.23, 0.25]
+
     # list of all functions
     list_of_func = [mt.correlate_threshold_density, mt.correlate_threshold_count, mt.correlate_threshold_fraction, mt.isolate_threshold_count]
     f = list_of_func[1]
@@ -133,3 +140,98 @@ if __name__ == "__main__":
     
     if network_type == 'synthetic':
         if exp_type == 'increase_nodes':
+            # directoy
+            dirc = 'datasets/'+ network_type + '/' + exp_type + '/'
+
+            for n in range(low, high, step):
+                f_path = 'er_' + str(n) + '.edges'
+
+                # read in the graph
+                G = nx.read_edgelist(dirc + f_path, nodetype = int, data=False)
+
+                # the number of vertices
+                n = G.number_of_nodes()
+
+                ####################
+                # Adjacency matrix #
+                ####################
+                A = nx.to_numpy_matrix(G) # Note: the order is G.nodes()
+
+                ####################
+                # Threshold matrix #
+                ####################
+                l = []
+                for v in G.nodes():
+                    d_v = G.degree[v]
+                    l.append(np.random.randint(low = 1, high = d_v + 2, size = (c)))
+
+                T = np.asarray(l)
+
+                #################
+                # Weight matrix #
+                ################# 
+                W = np.random.rand(c,c)
+                W = W/W.sum(axis=1)[:,None]
+
+                ########################
+                # Configuration matrix #
+                ########################
+                B = np.random.choice([0, 1], size = (n, c), p=[0.5, 0.5])
+                # B = np.random.randint(low = 0, high = 2, size = (n, c)) # Note: exclusion on the high value
+
+                ##################
+                # Density vector #
+                ##################
+                d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
+
+                # Funciton call
+                f(A, B, T, W, k = num_iter)
+        
+        if exp_type == 'increase_edges':
+            # directoy
+            dirc = 'datasets/'+ network_type + '/' + exp_type + '/'
+
+            for p in p_list:
+                # The path
+                path = 'er_' + str(p) + '.edges'
+
+                # read in the graph
+                G = nx.read_edgelist(dirc + f_path, nodetype = int, data=False)
+
+                # the number of vertices
+                n = G.number_of_nodes()
+
+                ####################
+                # Adjacency matrix #
+                ####################
+                A = nx.to_numpy_matrix(G) # Note: the order is G.nodes()
+
+                ####################
+                # Threshold matrix #
+                ####################
+                l = []
+                for v in G.nodes():
+                    d_v = G.degree[v]
+                    l.append(np.random.randint(low = 1, high = d_v + 2, size = (c)))
+
+                T = np.asarray(l)
+
+                #################
+                # Weight matrix #
+                ################# 
+                W = np.random.rand(c,c)
+                W = W/W.sum(axis=1)[:,None]
+
+                ########################
+                # Configuration matrix #
+                ########################
+                B = np.random.choice([0, 1], size = (n, c), p=[0.5, 0.5])
+                # B = np.random.randint(low = 0, high = 2, size = (n, c)) # Note: exclusion on the high value
+
+                ##################
+                # Density vector #
+                ##################
+                d = np.random.randint(low = 1, high = c+1, size = (c, 1)) # Note: exclusion on the high value
+
+                # Funciton call
+                f(A, B, T, W, k = num_iter)

@@ -6,7 +6,11 @@ import numpy as np
 # Edge creation probability for ER graphs
 p = 0.1
 
-for n in range(1000, 50000, 3000):
+low = 1000
+high = 50000
+step = 3000
+
+for n in range(low, high, step):
     # Graph
     G = nx.gnp_random_graph(n,p)
 
