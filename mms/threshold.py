@@ -48,8 +48,8 @@ def isolate_threshold_count(A, B, T, k, r = 0):
     """
 
     # Check if A is indeed an adjacency matrix
-    if not (mu.is_symmetric(A)):
-        raise ValueError("The adjacency matrix is not symmetric")
+    #if not (mu.is_symmetric(A)):
+        #raise ValueError("The adjacency matrix is not symmetric")
     
     # Make all 1s along the diagonal of A (since we are considering the closed neighborhood)
     np.fill_diagonal(A, 1)
@@ -123,8 +123,8 @@ def correlate_threshold_count(A, B, T, W, k, r = 0):
     """
 
     # Check if A is indeed an adjacency matrix
-    if not (mu.is_symmetric(A)):
-        raise ValueError("The adjacency matrix is not symmetric")
+    #if not (mu.is_symmetric(A)):
+        #raise ValueError("The adjacency matrix is not symmetric")
     
     # Make all 1s along the diagonal of A (since we are considering the closed neighborhood)
     np.fill_diagonal(A, 1)
@@ -196,8 +196,8 @@ def correlate_threshold_fraction(A, B, T, k, r = 0):
     """
 
     # Check if A is indeed an adjacency matrix
-    if not (mu.is_symmetric(A)):
-        raise ValueError("The adjacency matrix is not symmetric")
+    #if not (mu.is_symmetric(A)):
+        #raise ValueError("The adjacency matrix is not symmetric")
     
     # Make all 1s along the diagonal of A (since we are considering the closed neighborhood)
     np.fill_diagonal(A, 1)
@@ -274,8 +274,8 @@ def correlate_threshold_density(A, B, T, d, k):
     """
 
     # Check if A is indeed an adjacency matrix
-    if not (mu.is_symmetric(A)):
-        raise ValueError("The adjacency matrix is not symmetric")
+    #if not (mu.is_symmetric(A)):
+        #raise ValueError("The adjacency matrix is not symmetric")
     
     # Make all 1s along the diagonal of A (since we are considering the closed neighborhood)
     np.fill_diagonal(A, 1)
