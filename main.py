@@ -1,4 +1,5 @@
 import mms.threshold as mt
+import sys
 import time
 import mms.utility as mu
 import networkx as nx
@@ -21,12 +22,14 @@ if __name__ == "__main__":
     network_type = sys.argv[1] # real, synthetic
     exp_type = sys.argv[2] # increase_edges, increase_nodes
     network_name = sys.argv[3] # bio, bio2, ...
+    number_of_contagions = sys.argv[4]
+    print(network_name)
 
     # the number of contagions
-    c = 3
+    c = int(number_of_contagions)
 
     # the number of iterations
-    num_iter = 10
+    num_iter = 50
 
     # parameters for synthetic networks
     low = 1000
@@ -37,7 +40,7 @@ if __name__ == "__main__":
 
     # list of all functions
     list_of_func = [mt.correlate_threshold_density, mt.correlate_threshold_count, mt.correlate_threshold_fraction, mt.isolate_threshold_count]
-    f = list_of_func[1]
+    f = list_of_func[1] # The function 
 
     if network_type == 'real':
         if exp_type == 'increase_nodes':
@@ -52,6 +55,8 @@ if __name__ == "__main__":
 
             # the number of vertices
             n = G.number_of_nodes()
+            m = G.number_of_edges()
+            print("n = {}, m = {}".format(n, m))
 
             ####################
             # Adjacency matrix #
@@ -88,11 +93,12 @@ if __name__ == "__main__":
             start = time.process_time()
 
             # Funciton call
-            f(A, B, T, W, k = num_iter)
+            f(A, B, T, d, k = num_iter)
         
             end = time.process_time()
         
             print("The time in seconds for {} is {}".format(network_name, end-start))
+            print()
 
         if exp_type == 'increase_edges':
             noise_levels = ['0', '0.01', '0.03', '0.05', '0.07', '0.09', '0.11', '0.13', '0.15', '0.17', '0.19', '0.21', '0.23', '0.25']
@@ -145,11 +151,11 @@ if __name__ == "__main__":
                 start = time.process_time()
 
                 # Funciton call
-                f(A, B, T, W, k = num_iter)
+                f(A, B, T, d, k = num_iter)
 
                 end = time.process_time()
 
-                print("The time in seconds for the network:{} and the percentage: {} is {}".format(network_name, noise, end-start)) 
+                print("The time in seconds for the network:{} and the percentage: {} is {}".format(network_name, noise, end-start))
     
     if network_type == 'synthetic':
         if exp_type == 'increase_nodes':
@@ -164,6 +170,9 @@ if __name__ == "__main__":
 
                 # the number of vertices
                 n = G.number_of_nodes()
+                
+                m = G.number_of_edges()
+                print("n = {}, m = {}\n".format(n, m))
 
                 ####################
                 # Adjacency matrix #
@@ -190,7 +199,7 @@ if __name__ == "__main__":
                 # Configuration matrix #
                 ########################
                 B = np.random.choice([0, 1], size = (n, c), p=[0.5, 0.5])
-                # B = np.random.randint(low = 0, high = 2, size = (n, c)) # Note: exclusion on the high value
+                B = np.random.randint(low = 0, high = 2, size = (n, c)) # Note: exclusion on the high value
 
                 ##################
                 # Density vector #
@@ -205,7 +214,7 @@ if __name__ == "__main__":
                 end = time.process_time()
                 print("RE network of size {} takes {} seconds".format(n, end-start))
         
-        if exp_type == 'increase_edges':
+        elif exp_type == 'increase_edges':
             # directoy
             dirc = 'datasets/'+ network_type + '/' + exp_type + '/'
 
@@ -218,11 +227,13 @@ if __name__ == "__main__":
 
                 # the number of vertices
                 n = G.number_of_nodes()
+                m = G.number_of_edges()
+                print("n = {}, m = {}\n".format(n, m))
 
                 ####################
                 # Adjacency matrix #
                 ####################
-                A = nx.to_numpy_matrix(G) # Note: the order is G.nodes()
+                A = nx.to_numpy_matrix(G, dtype=int) # Note: the order is G.nodes()
 
                 ####################
                 # Threshold matrix #
@@ -254,7 +265,8 @@ if __name__ == "__main__":
                 start = time.process_time() # Start the time count	
                 		
                 # Funciton call
-                f(A, B, T, W, k = num_iter)
+                f(A, B, T, d, k = num_iter)
 
                 end = time.process_time() # End the time count
                 print("The ER graph with p = {} takes {} seconds".format(p, end-start))
+                print()
