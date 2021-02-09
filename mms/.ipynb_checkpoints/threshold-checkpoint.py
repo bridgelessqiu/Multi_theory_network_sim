@@ -229,8 +229,7 @@ def correlate_threshold_density(A, B, T, d, k):
     print("Max number of iteratios reached")
     return B
 
-
-def covid_mask(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
+def two_layer_1(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
     """
         Description
         -----------
@@ -241,42 +240,14 @@ def covid_mask(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
         Parameters
         ----------
         A: n x n scipy sparse matrix, int {0, 1}
-           The adjacency matrix of G.
+           The adjacency matrix of G
         
         D_inverse: n x n scipy sparse matrix, float [0, 1]
-            The inversed diagonal matrix of G.
+            The inversed diagonal matrix of G
         
         a_1: n x 1 scipy sparse matrix, int {0, 1}
-            (a_1)_i = 1 if the person i is prosocial, and (a_1)_i = 0 otherwise.
-
-        t_2: n x 1 numpy array, float [0, 1]
-            (t_2)_i is threshold percentage of neighbors who wear masks for person 
-            i to wear a mask in the next iteration.
-
-        t_3: n x 1 numpy array, float [0, 1]
-           (t_3)_i is the threshold percentage of the overall infection of the population
-           for person i to wear a mask in the next iteration.
-
-        b_1: n x 1 scipy sparse matrix, int {0, 1}
-            (b_1)_i = 1 if the person i wears a mask at the current iteration.
-
-        b_2: n x 1 scipy sparse matrix, int {0, 1}
-            (b_2)_1 = 1 if the person i is infected by the disease at the current iteration
-    
-        p: float [0, 1]
-            Transimission probability of the disease
-
-        alpha: The damping factor on p when the person himself wears a mask.
-
-        beta: The damping factor on p when a neighbor of a person wears a mask.
-
-        r: Recovery probability.
-
-        k: The maximum number of time-steps.
-            
+            If a person is prosocial or not
     """
-    # Keep track of the dynamic: {time: [# of masks, # of infections]}
-    dynamic = {}
     
     # Compute the degree fraction matrix
     F = D_inverse @ A
@@ -285,27 +256,28 @@ def covid_mask(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
     # The number of vertices
     n = np.shape(A)[0]
     
-    # The one and zero vectors
+    # The one vector
     one = np.ones((n, 1), dtype = 'float')
     zero = np.zeros((n, 1), dtype = 'float')
 
-    # The recovery vector: b_3
-    b_3 = np.zeros((n, 1), dtype = 'float') # Initially, no one has recovered. 
+    # The initial recovery vector (no one has recovered)
+    b_3 = np.zeros((n, 1), dtype = 'float')
+    b_3 = sparse.csr_matrix(b_3)
 
-    # The susceptible vector: b_4
+    # The inital susceptible vector
     b_4 = -b_2 - b_3
     b_4[b_4 == 0.0] = 1.0
     b_4[b_4 < 0.0] = 0.0
 
     # The main loop
     for i in range(k):
-        dynamic[i] = [np.count_nonzero(b_1), np.count_nonzero(b_2), np.count_nonzero(b_3), np.count_nonzero(b_4)]
-
-        # need b_1_last to update the state of the second contagion
+        # need b_1__last to Update the state of the second contagion
         b_1_last = b_1 
         
+        # Deteremine if a fixed point is reached, that is everyone has recovered (if r != 0)
         b_4_last = b_4 
-    
+        
+        # This can also be used to determine if a fixed point is reached
         b_2_last = b_2
     
         # The fraction of total number of infections
@@ -337,10 +309,10 @@ def covid_mask(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
         # The # of infected neighbors without mask
         d_1 = d - d_2
         
-        # Only susceptibles (b_4) can be infected 
+        #Only susceptibles (b_4) can be infected 
         #--------------------------------------------------#
         # h1 : the probability of not getting infected from neighbors who do not wear masks (1 - p or 1 - alpha p)
-        temp = one - (b_1 * (1.0 - alpha)) # IMPORTANT: b_1_last vs b_1 (syn vs asyn)
+        temp = one - (b_1 * (1.0 - alpha)) # IMPORTANT!!!!! b_1_last? (syn vs asyn)
         h_1 = one - (temp * p)
             
         # h2: contains the probability of not getting infected from neighbors who wear masks (1 - beta p or 1 - alpha beta p)
@@ -369,14 +341,16 @@ def covid_mask(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
         b_4 = -b_2 - b_3
         b_4[b_4 == 0.0] = 1.0
         b_4[b_4 < 0.0] = 0.0
+        
+        # Determine if a fixed point it reached
+        if np.array_equal(b_2, b_2_last):
+#             print("A fixed point is reached at iteration {}".format(i))
+#             return b_2
+            return np.count_nonzero(b_2) - 1 ####################
 
-        # A fixed point is reached under zero infection
-        if np.array_equal(b_2, zero):
-            print("A fixed point is reached at iteration {}".format(i))
-            return i, dynamic
-
-    print("Maximum number of iteration is reached")    
-    return i, dynamic
+#     print("Maximum number of iteration is reached")    
+#     return b_2
+    return np.count_nonzero(b_2) - 1 ####################
 
 
 # The SIS model, and each node recoverys in exact one day (r = 1)
@@ -474,4 +448,7 @@ def two_layer_SIS(A, D_inverse, a_1, t_2, t_3, b_1, b_2, p, alpha, beta, r, k):
         b_4[b_4 < 0.0] = 0.0
         
         # Determine if a fixed point it reached
-        # if np.array_equal(b_2, b_2_last):
+        if np.array_equal(b_2, b_2_last):
+            return np.count_nonzero(b_2)
+
+    return np.count_nonzero(b_2)
